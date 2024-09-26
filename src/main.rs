@@ -12,35 +12,41 @@ struct Cli {
     #[arg(long)]
     port: Option<PathBuf>,
 
-    /// Turn debugging information on
-    #[arg(short, long, action = clap::ArgAction::Count)]
-    verbose: u8,
-
-    #[clap(required = true)]
-    mode: Mode,
-
     #[command(subcommand)]
-    command: Command
+    command: ModeSelectCommand
 }
 
 #[derive(Subcommand)]
-enum Command {
+enum ModeSelectCommand {
+    Server {
+        #[command(subcommand)]
+        command: ServerSubcommand
+    },
+
+    Client {
+        #[command(subcommand)]
+        command: ClientSubcommand
+    }
+}
+
+#[derive(Subcommand)]
+enum ClientSubcommand {
     /// Adds an object
     Add {
-        object: Object,
+        object: ClientObject,
     },
 
     /// Removes an object
     Remove {
         /// Which type of object to remove
-        object: Object,
+        object: ClientObject,
         name: String
     },
 
     /// Lists objects
     List {
         /// List all, even inactive/disabled
-        object: Object,
+        object: ClientObject,
 
         #[arg(short, long)]
         all: Option<bool> 
@@ -48,7 +54,7 @@ enum Command {
 
     /// Edits an object
     Edit {
-        object: Object
+        object: ClientObject
     },
 
     // Done messing with objects
@@ -59,30 +65,90 @@ enum Command {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-enum Mode {
-    Server,
-    Client
+#[derive(Subcommand)]
+enum ServerSubcommand {
+    /// Adds an object
+    Add {
+        object: ClientObject,
+    },
+
+    /// Removes an object
+    Remove {
+        /// Which type of object to remove
+        object: ClientObject,
+        name: String
+    },
+
+    /// Lists objects
+    List {
+        /// List all, even inactive/disabled
+        object: ClientObject,
+
+        #[arg(short, long)]
+        all: Option<bool> 
+    },
+
+    /// Edits an object
+    Edit {
+        object: ClientObject
+    },
+
+    /// Edits the config
+    Config {
+        setting: ClientSetting,
+        value: Option<String>
+    },
+    
+    /// Connect to server
+    Connect {
+        name: String
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-enum Object {
+enum ClientObject {
     Nic,
-    User,
+    Account,
+    Cert,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+enum ClientSetting {
+    Remote
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+enum ServerObject {
     Hub,
+    User,
+    Cert,
+    Table,
+    Group,
+
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+enum ServerSetting {
+    DHCP,
+    IPSec,
+    Log,
+
 }
 
 fn main() {
     let cli = Cli::parse();
 
-    // You can see how many times a particular flag or argument occurred
-    // Note, only flags can have multiple occurrences
-    match cli.verbose {
-        0 => println!("Debug mode is off"),
-        1 => println!("Debug mode is kind of on"),
-        2 => println!("Debug mode is on"),
-        _ => println!("Don't be crazy"),
-    }
-
     // Continued program logic goes here...
+    match cli.command {
+        ModeSelectCommand::Client { command } => {
+            match command {
+                ClientSubcommand::Add { object } => todo!(),
+                ClientSubcommand::Remove { object, name } => todo!(),
+                ClientSubcommand::List { object, all } => todo!(),
+                ClientSubcommand::Edit { object } => todo!(),
+                ClientSubcommand::Connect { name } => todo!(),
+            }
+        }
+        ModeSelectCommand::Server { command } => todo!(),
+    }
 }
